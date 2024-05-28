@@ -1,14 +1,23 @@
 import { cryptoData } from "./api_data.js"
+import { cryptoHistory } from "./history.js";
 
 const allCryptoList = document.querySelector('#all-crypto-list')
 const navLinks = document.querySelectorAll('.nav-link')
+const ctx = document.getElementById('myChart');
+console.log(ctx)
 
 const navigatePageViews = (e) => {
+  console.log('navigatePageViews')
   const activeLink = e.target.id.split('-')[2]
   const allViewIds = ['scanner', 'research', 'transact']
   allViewIds.forEach(id => document.getElementById(`${id}`).style.display = 'none')
   document.getElementById(`${activeLink}`).style.display = 'block'
   navLinks.forEach(link => link.classList.remove('active'))
+}
+
+const handleError = (error) => {
+  console.log(error)
+  alert('Something wen wrong during fetch!')
 }
 
 const getCryptoDataFromAPI = () => {
@@ -60,16 +69,65 @@ const renderCryptoCard = (crypto) => {
     </div>
   </div>`
   allCryptoList.appendChild(cardDiv)
+  
 }
 
-const handleError = (error) => {
-  console.log(error)
-  alert('Something wen wrong during fetch!')
+const fetchCryptoHistory = (cryptoId, interval) => {
+  // Get the start of the year
+const startOfYear = new Date(new Date().getFullYear(), 4, 1).getTime();
+// Get the current time
+const currentTime = Date.now();
+// Construct the query URL
+const baseUrl = 'https://api.coincap.io/v2/assets/bitcoin/history';
+//const interval = 'd1'; // daily interval
+const query = `?interval=${interval}&start=${startOfYear}&end=${currentTime}`;
+const endpoint = `${baseUrl}${query}`;
+
+  fetch(endpoint)
+    .then(res => res.json())
+    .then(console.log)
+    .catch(handleError)
 }
+
+// fetchCryptoHistory('bitcoin', 'd1')
+
+const chartPriceData = []
+const chartLabels = []
+
+const constructChartData = (priceHistory) => {
+  priceHistory.data.forEach(interval => {
+    // console.log(interval.priceUsd)
+    chartPriceData.push(interval.priceUsd)
+    chartLabels.push(interval.date.slice(0,10))
+  })
+  console.log(chartPriceData)
+
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: chartLabels,
+      datasets: [{
+        label: 'Crypt Price',
+        data: chartPriceData,
+        borderWidth: 1
+      }]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: false
+        }
+      }
+    }
+  });
+}
+
+constructChartData(cryptoHistory)
 
 const initApp = () => {
   handleFetchSuccess(cryptoData)
-  navLinks.forEach(link => addEventListener('click', navigatePageViews))
+  // getCryptoDataFromAPI()
+  navLinks.forEach(link => link.addEventListener('click', navigatePageViews))
 }
 
 initApp()
