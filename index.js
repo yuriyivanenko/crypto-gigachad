@@ -4,12 +4,12 @@ import { cryptoHistory } from "./history.js";
 const allCryptoList = document.querySelector('#all-crypto-list')
 const navLinks = document.querySelectorAll('.nav-link')
 const ctx = document.getElementById('myChart');
-console.log(ctx)
+let chartInstance
 
 const navigatePageViews = (e) => {
-  console.log('navigatePageViews')
+  // console.log('navigatePageViews')
   const activeLink = e.target.id.split('-')[2]
-  const allViewIds = ['scanner', 'research', 'transact']
+  const allViewIds = ['scanner', 'chart', 'transact']
   allViewIds.forEach(id => document.getElementById(`${id}`).style.display = 'none')
   document.getElementById(`${activeLink}`).style.display = 'block'
   navLinks.forEach(link => link.classList.remove('active'))
@@ -62,52 +62,76 @@ const renderCryptoCard = (crypto) => {
       <div class="icon-text">Price: ${priceFormatter.format(crypto.priceUsd)}</div>
     </div>
     <div class="px-3">
-      <button type="button" class="btn btn-secondary text-nowrap"><i class="bi bi-graph-down"></i> Research</button>
+      <button type="button" id="chart-${crypto.id}" data-name="${crypto.name}" 
+        data-icon="./64/${crypto.id}.png" data-ticker="${crypto.id}" class="btn btn-secondary text-nowrap">
+        Chart
+      </button>
     </div>
     <div class="px-3">
       <button type="button" class="btn btn-primary text-nowrap"><i class="bi bi-currency-bitcoin"></i> Buy / Sell</button>
     </div>
   </div>`
   allCryptoList.appendChild(cardDiv)
-  
+  document.getElementById(`chart-${crypto.id}`).addEventListener('click', chartSelectedCrypto)
 }
 
-const fetchCryptoHistory = (cryptoId, interval) => {
+const chartSelectedCrypto = (e) => {
+  const cryptoData = {...e.target.dataset}
+  navigateToChart(cryptoData)
+}
+
+const navigateToChart = (cryptoToChart) => {
+  document.querySelector('#nav-link-chart').click()
+  console.log(cryptoToChart)
+  const chartInfo = document.querySelector('#chart-info')
+  chartInfo.innerHTML =`
+    <div class="d-flex">
+        <img width="50px" alt="${cryptoToChart.name}" src="${cryptoToChart.icon}" />
+    <h1 class="px-3">${cryptoToChart.name}</h1>
+    </div>
+    `
+  fetchCryptoHistory(cryptoToChart.ticker, 'd1', cryptoToChart.name)
+}
+
+const fetchCryptoHistory = (cryptoId, interval, cryptoName) => {
   // Get the start of the year
-const startOfYear = new Date(new Date().getFullYear(), 4, 1).getTime();
+const startOfYear = new Date(new Date().getFullYear(), 0, 1).getTime();
 // Get the current time
 const currentTime = Date.now();
 // Construct the query URL
-const baseUrl = 'https://api.coincap.io/v2/assets/bitcoin/history';
+const baseUrl = `https://api.coincap.io/v2/assets/${cryptoId}/history`
 //const interval = 'd1'; // daily interval
 const query = `?interval=${interval}&start=${startOfYear}&end=${currentTime}`;
 const endpoint = `${baseUrl}${query}`;
 
   fetch(endpoint)
     .then(res => res.json())
-    .then(console.log)
+    .then(data => renderChart(data, cryptoName))
     .catch(handleError)
 }
 
-// fetchCryptoHistory('bitcoin', 'd1')
+const renderChart = (priceHistory, cryptoName) => {
+  constructChartData(priceHistory, cryptoName)
+}
 
-const chartPriceData = []
-const chartLabels = []
-
-const constructChartData = (priceHistory) => {
+const constructChartData = (priceHistory, cryptoName) => {
+  const chartPriceData = []
+  const chartLabels = []
   priceHistory.data.forEach(interval => {
-    // console.log(interval.priceUsd)
     chartPriceData.push(interval.priceUsd)
     chartLabels.push(interval.date.slice(0,10))
   })
   console.log(chartPriceData)
+  if(chartInstance){
+    chartInstance.destroy()
+  }
 
-  new Chart(ctx, {
+  chartInstance = new Chart(ctx, {
     type: 'line',
     data: {
       labels: chartLabels,
       datasets: [{
-        label: 'Crypt Price',
+        label: `${cryptoName} YTD`,
         data: chartPriceData,
         borderWidth: 1
       }]
@@ -122,7 +146,7 @@ const constructChartData = (priceHistory) => {
   });
 }
 
-constructChartData(cryptoHistory)
+// constructChartData(cryptoHistory)
 
 const initApp = () => {
   handleFetchSuccess(cryptoData)
