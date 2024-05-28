@@ -1,6 +1,15 @@
 import { cryptoData } from "./api_data.js"
 
 const allCryptoList = document.querySelector('#all-crypto-list')
+const navLinks = document.querySelectorAll('.nav-link')
+
+const navigatePageViews = (e) => {
+  const activeLink = e.target.id.split('-')[2]
+  const allViewIds = ['scanner', 'research', 'transact']
+  allViewIds.forEach(id => document.getElementById(`${id}`).style.display = 'none')
+  document.getElementById(`${activeLink}`).style.display = 'block'
+  navLinks.forEach(link => link.classList.remove('active'))
+}
 
 const getCryptoDataFromAPI = () => {
   fetch('https://api.coincap.io/v2/assets')
@@ -36,18 +45,18 @@ const renderCryptoCard = (crypto) => {
     <div class="details">
       <div class="title">${crypto.name}</div>
       <div class="info">
-          <div class="icon-text"><i class="bi bi-clock px-2"></i> 24h Change: ${last24HrFormatter(crypto)}%</div>
+        <div class="icon-text"><i class="bi bi-clock px-2"></i> 24h Change: ${last24HrFormatter(crypto)}%</div>
     </div>
     </div>
     <div class="d-flex w-100 justify-content-between align-items-center px-3 py-2">
     <div class="price-container px-3">
-        <div class="icon-text">Price: ${priceFormatter.format(crypto.priceUsd)}</div>
+      <div class="icon-text">Price: ${priceFormatter.format(crypto.priceUsd)}</div>
     </div>
     <div class="px-3">
-        <button type="button" class="btn btn-secondary text-nowrap"><i class="bi bi-graph-down"></i> Research</button>
+      <button type="button" class="btn btn-secondary text-nowrap"><i class="bi bi-graph-down"></i> Research</button>
     </div>
     <div class="px-3">
-        <button type="button" class="btn btn-primary text-nowrap"><i class="bi bi-currency-bitcoin"></i> Buy / Sell</button>
+      <button type="button" class="btn btn-primary text-nowrap"><i class="bi bi-currency-bitcoin"></i> Buy / Sell</button>
     </div>
   </div>`
   allCryptoList.appendChild(cardDiv)
@@ -60,6 +69,7 @@ const handleError = (error) => {
 
 const initApp = () => {
   handleFetchSuccess(cryptoData)
+  navLinks.forEach(link => addEventListener('click', navigatePageViews))
 }
 
 initApp()

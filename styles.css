@@ -1,3 +1,15 @@
+#scanner{
+  display: block;
+}
+
+#research{
+  display: none;
+}
+
+#transact{
+  display: none;
+}
+
 .crypto-card {
   border-radius: 10px;
   border: 1px solid #e0e0e0;
