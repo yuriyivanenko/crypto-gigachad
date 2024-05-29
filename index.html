@@ -78,10 +78,16 @@
             <h6 class="card-subtitle mb-2 text-muted">Buy & Sell Crypto</h6>
             <div class="input-group mb-3" id="search-group">
                 <span class="input-group-text" id="basic-addon1"><i class="bi bi-currency-bitcoin"></i></span>
-                <input type="text" class="form-control" id="crypto-search-input" placeholder="Enter Token Name"  aria-describedby="button-addon2">
+                <input required type="text" class="form-control" id="crypto-search-input" placeholder="Enter Token Name"  aria-describedby="button-addon2">
                 <button class="btn btn-outline-secondary" type="button" id="search-crypto-button">Get Price</button>
             </div>
-            <p id="search-result"> </p>
+            <p id="search-result">-</p>
+            <div class="input-group mb-3" id="search-group">
+              <span class="input-group-text" id="basic-addon1"><i class="bi bi-currency-dollar"></i></span>
+              <input required ="text" class="form-control" id="crypto-buy-input" placeholder="USD amount to buy"  aria-describedby="button-addon2">
+              <button class="btn btn-outline-secondary" type="button" id="buy-crypto-button">Buy</button>
+          </div>
+          <p id="tokens-amount">-</p>
             </div>
           </div>
         </div>

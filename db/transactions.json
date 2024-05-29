@@ -1,0 +1,49 @@
+{
+  "transactions": [
+    {
+      "id": "58cc",
+      "buyAmount": 100,
+      "tokensAmount": 0.0014831623862327655,
+      "currentPrice": 67423.50057433707,
+      "todaysDate": "05/29/2024",
+      "crypto": "bitcoin",
+      "buyValue": 100
+    },
+    {
+      "id": "18b8",
+      "buyAmount": 1000,
+      "tokensAmount": 0.014844004535606801,
+      "currentPrice": 67367.26586153131,
+      "todaysDate": "05/29/2024",
+      "crypto": "bitcoin",
+      "buyValue": 1000
+    },
+    {
+      "id": "9ce0",
+      "buyAmount": 100,
+      "tokensAmount": 0.0014844004535606802,
+      "currentPrice": 67367.26586153131,
+      "todaysDate": "05/29/2024",
+      "crypto": "bitcoin",
+      "buyValue": 100.00000000000001
+    },
+    {
+      "id": "dcd0",
+      "buyAmount": 1900,
+      "tokensAmount": 0.505883151906254,
+      "currentPrice": 3755.8080217545807,
+      "todaysDate": "05/29/2024",
+      "crypto": "ethereum",
+      "buyValue": 1899.9999999999998
+    },
+    {
+      "id": "5aa6",
+      "buyAmount": 2500,
+      "tokensAmount": 0.6656357261924395,
+      "currentPrice": 3755.8080217545807,
+      "todaysDate": "05/29/2024",
+      "crypto": "ethereum",
+      "buyValue": 2500
+    }
+  ]
+}

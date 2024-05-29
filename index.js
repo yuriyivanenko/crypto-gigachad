@@ -6,9 +6,13 @@ const navLinks = document.querySelectorAll('.nav-link')
 const ctx = document.getElementById('myChart');
 const addFundsBtn = document.querySelector('#add-funds-button')
 const searchCryptoBtn = document.querySelector('#search-crypto-button')
+const buyBtn = document.querySelector('#buy-crypto-button')
+const buyInputField = document.querySelector('#crypto-buy-input')
 let chartInstance
 
 let globalWallet = {}
+let globalSearchResult
+let globalTransactions
 
 const navigatePageViews = (e) => {
   const activeLink = e.target.parentElement.id.split('-')[2]
@@ -37,6 +41,23 @@ const getWalletInfo = () => {
     .catch(handleError)
 }
 
+const getTransactions = () => {
+  fetch('http://localhost:3001/transactions')
+    .then(res => res.json())
+    .then(handleGetTransactionsSuccess)
+    .catch(handleError)
+}
+
+const handleGetTransactionsSuccess = (transactionsArray) => {
+  globalTransactions = transactionsArray
+  //Just like green grocer we need a globalHoldings object
+  //It will hold each crypto and the value of it today
+}
+
+const renderTable = (transaction) => {
+
+}
+
 const handleFundsSubmit = () => {
   let fundsAmount = parseInt(document.querySelector('#funds-input').value)
   fundsAmount += globalWallet.amount
@@ -44,25 +65,89 @@ const handleFundsSubmit = () => {
 }
 
 const handleSearchCrypto = () => {
-  const tokenName = document.querySelector('#crypto-search-input').value
+  const tokenName = document.querySelector('#crypto-search-input').value.toLowerCase()
   tokenName === '' ? alert('Please enter a valid crypto currency') : getCryptoPricing(tokenName)
+}
+
+const handleBuyInputChange = (e) => {
+  const buyAmount = e.target.value
+  let tokensToBuy
+  if(globalSearchResult){
+    // console.log(globalSearchResult)
+    tokensToBuy = (buyAmount / globalSearchResult.priceUsd)
+    const tokensAmount = document.querySelector('#tokens-amount')
+    tokensAmount.textContent = 
+      `Tokens to buy: ${tokensToBuy}`
+  }
+}
+
+const handleBuyCrypto = () => {
+  const buyInfo = {
+    buyAmount: parseInt(document.querySelector('#crypto-buy-input').value),
+    tokensAmount: parseFloat(document.querySelector('#tokens-amount').textContent.split(' ')[3]),
+    currentPrice: parseFloat(globalSearchResult.priceUsd),
+    todaysDate: getCurrentDateFormatted(),
+    crypto: globalSearchResult.id
+  }
+  buyInfo.buyValue = buyInfo.tokensAmount * buyInfo.currentPrice
+  if(buyInfo.buyAmount <= globalWallet.amount){
+    // console.log('You have enough to buy')
+    if(!globalSearchResult){
+      alert('You need to first search a crypto currency')
+    }else{
+      postBuyTransaction(buyInfo)
+    }
+  }else if(isNaN(buyInfo.buyAmount)){
+    alert('Please enter a valid number')
+  }
+  else{
+    alert(`You're poor! Get some more funds!`)
+  }
+}
+
+const postBuyTransaction = (buyInfo) => {
+  fetch('http://localhost:3001/transactions',{
+  method: "POST",
+  headers: {'Content-Type': 'application/json'},
+  body: JSON.stringify(buyInfo)
+  })
+    .then(res => res.json())
+    .then(handleBuySuccess)
+    .catch(handleError)
+}
+
+const handleBuySuccess = () => {
+  document.querySelector('#crypto-search-input').value = ''
+  document.querySelector('#crypto-buy-input').value = ''
+  document.querySelector('#search-result').textContent = '-'
+  document.querySelector('#tokens-amount').textContent = 'Order submitted successfully!'
+}
+
+const getCurrentDateFormatted= () => {
+  const date = new Date();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0')
+  const day = date.getDate().toString().padStart(2, '0')
+  const year = date.getFullYear()
+  const formattedDate = `${month}/${day}/${year}`
+  return formattedDate
 }
 
 const getCryptoPricing = (tokenName) => {
   fetch(`https://api.coincap.io/v2/assets/${tokenName}`)
     .then(res => res.json())
-    .then(handleGetPricingSuccess)
+    .then(renderSearchResult)
     .catch(handleError)
 }
 
-const handleGetPricingSuccess = (cryptoData) => {
-  console.log(cryptoData)
+const renderSearchResult = (cryptoData) => {
+  // console.log(cryptoData)
   const searchResult = document.querySelector('#search-result')
   searchResult.textContent = ''
   if(cryptoData.error){
     searchResult.textContent = cryptoData.error
   }else{
-    searchResult.textContent = `Current Price: ${usdFormatter.format(cryptoData.data.priceUsd)}`
+    searchResult.textContent = `Current Price: ${usdFormatter.format(cryptoData.data.priceUsd)} - ${cryptoData.data.symbol}`
+    globalSearchResult = cryptoData.data
   }
 }
 
@@ -98,7 +183,7 @@ const renderWalletBalance = (walletInfo) => {
   const walletElem = document.querySelector('#wallet-balance')
   const balanceUsd = usdFormatter.format(walletInfo[0].amount)
   walletElem.textContent = balanceUsd
-  console.log('Global wallet after re-render:',globalWallet)
+  // console.log('Global wallet after re-render:',globalWallet)
 }
 
 const renderCryptoCard = (crypto) => {  
@@ -204,10 +289,13 @@ const constructChartData = (priceHistory, cryptoName) => {
 const initApp = () => {
   handleFetchSuccess(cryptoData)
   getWalletInfo()
+  getTransactions()
   // getCryptoDataFromAPI()
   navLinks.forEach(link => link.addEventListener('click', navigatePageViews))
   addFundsBtn.addEventListener('click', handleFundsSubmit)
   searchCryptoBtn.addEventListener('click', handleSearchCrypto)
+  buyBtn.addEventListener('click', handleBuyCrypto)
+  buyInputField.addEventListener('input', handleBuyInputChange)
 }
 
 initApp()
