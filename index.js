@@ -8,7 +8,8 @@ let chartInstance
 
 const navigatePageViews = (e) => {
   // console.log('navigatePageViews')
-  const activeLink = e.target.id.split('-')[2]
+  const activeLink = e.target.parentElement.id.split('-')[2]
+  // console.log(e.target.parentElement)
   const allViewIds = ['scanner', 'chart', 'transact']
   allViewIds.forEach(id => document.getElementById(`${id}`).style.display = 'none')
   document.getElementById(`${activeLink}`).style.display = 'block'
@@ -81,8 +82,8 @@ const chartSelectedCrypto = (e) => {
 }
 
 const navigateToChart = (cryptoToChart) => {
-  document.querySelector('#nav-link-chart').click()
-  console.log(cryptoToChart)
+  document.querySelector('#nav-link-chart').childNodes[0].click()
+  // console.log(document.querySelector('#nav-link-chart').childNodes[0])
   const chartInfo = document.querySelector('#chart-info')
   chartInfo.innerHTML =`
     <div class="d-flex">
@@ -121,7 +122,7 @@ const constructChartData = (priceHistory, cryptoName) => {
     chartPriceData.push(interval.priceUsd)
     chartLabels.push(interval.date.slice(0,10))
   })
-  console.log(chartPriceData)
+  // console.log(chartPriceData)
   if(chartInstance){
     chartInstance.destroy()
   }
