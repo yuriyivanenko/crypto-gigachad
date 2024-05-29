@@ -9,7 +9,7 @@ export const cryptoData = {
       "maxSupply": "21000000.0000000000000000",
       "marketCapUsd": "1339337796491.6305894016146668",
       "volumeUsd24Hr": "8694735963.8661890809335395",
-      "priceUsd": "67987.7496817656290076",
+      "priceUsd": "68247.7496817656290076",
       "changePercent24Hr": "-1.2321234246536911",
       "vwap24Hr": "68996.5190039008698521",
       "explorer": "https://blockchain.info/"

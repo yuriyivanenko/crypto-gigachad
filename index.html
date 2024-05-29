@@ -46,28 +46,68 @@
   </div>
   <!-- WALLET -->
   <div class="container mt-5" id="wallet">
-    <div class="card wallet-cards" style="width: 18rem;">
-      <div class="card-body">
-        <h5 class="card-title">Wallet</h5>
-        <h6 class="card-subtitle mb-2 text-muted">Current cash available</h6>
-        <p class="card-text" id="wallet-balance"></p>
+    <div class="d-flex">
+      <div class="col-5">
+        <div class="card wallet-cards" style="width: 18rem;">
+          <div class="card-body">
+            <h5 class="card-title">Wallet</h5>
+            <h6 class="card-subtitle mb-2 text-muted">Current cash available</h6>
+            <p class="card-text" id="wallet-balance"></p>
+          </div>
+        </div>
+      
+        
+          <button class="btn btn-primary my-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+            Add funds
+          </button>
+          <div class="collapse" id="collapseExample">
+            <div class="card card-body wallet-cards">
+              <p>Add funds to wallet</p>
+              <div class="input-group mb-3">
+                <input type="text" class="form-control" id="funds-input" placeholder="$ Rounded amount"  aria-describedby="button-addon2">
+                <button class="btn btn-outline-secondary" type="button" id="add-funds-button">Submit</button>
+              </div>
+            </div>
+          </div>
       </div>
-    </div>
-  
-    
-      <button class="btn btn-primary my-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
-        Add funds
-      </button>
-    
-    <div class="collapse" id="collapseExample">
-      <div class="card card-body wallet-cards">
-        <p>Add funds to wallet</p>
-        <div class="input-group mb-3">
-          <input type="text" class="form-control" id="funds-input" placeholder="$ Rounded amount"  aria-describedby="button-addon2">
-          <button class="btn btn-outline-secondary" type="button" id="add-funds-button">Submit</button>
+      
+      <div class="col-8">
+        <div class="card transaction-card">
+          <div class="card-body">
+            <h5 class="card-title">Transaction Window</h5>
+            <h6 class="card-subtitle mb-2 text-muted">Buy & Sell Crypto</h6>
+            <div class="input-group mb-3" id="search-group">
+                <span class="input-group-text" id="basic-addon1"><i class="bi bi-currency-bitcoin"></i></span>
+                <input required type="text" class="form-control" id="crypto-search-input" placeholder="Enter Token Name"  aria-describedby="button-addon2">
+                <button class="btn btn-outline-secondary" type="button" id="search-crypto-button">Get Price</button>
+            </div>
+            <p id="search-result">-</p>
+            <div class="input-group mb-3" id="search-group">
+              <span class="input-group-text" id="basic-addon1"><i class="bi bi-currency-dollar"></i></span>
+              <input required ="text" class="form-control" id="crypto-buy-input" placeholder="USD amount to buy"  aria-describedby="button-addon2">
+              <button class="btn btn-outline-secondary" type="button" id="buy-crypto-button">Buy</button>
+          </div>
+          <p id="tokens-amount">-</p>
+            </div>
+          </div>
         </div>
       </div>
+
+      <h3 class="mt-3">Current Holdings</h3>
+      <table class="table mt-3" id="holdings-table">
+        <thead>
+          <tr>
+            <th scope="col">Crypto Name</th>
+            <th scope="col">Tokens Amount</th>
+            <th scope="col">Value</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+
     </div>
+    
 
   </div>   
   
