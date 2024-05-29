@@ -7,9 +7,7 @@ const ctx = document.getElementById('myChart');
 let chartInstance
 
 const navigatePageViews = (e) => {
-  // console.log('navigatePageViews')
   const activeLink = e.target.parentElement.id.split('-')[2]
-  // console.log(e.target.parentElement)
   const allViewIds = ['scanner', 'chart', 'transact']
   allViewIds.forEach(id => document.getElementById(`${id}`).style.display = 'none')
   document.getElementById(`${activeLink}`).style.display = 'block'
@@ -18,7 +16,7 @@ const navigatePageViews = (e) => {
 
 const handleError = (error) => {
   console.log(error)
-  alert('Something wen wrong during fetch!')
+  alert('Something went wrong while trying to retrieve data!')
 }
 
 const getCryptoDataFromAPI = () => {
@@ -41,9 +39,7 @@ const last24HrFormatter = (crypto) => {
   }
 }
 
-const handleFetchSuccess = (cryptoObject) => {
-  cryptoObject.data.forEach(renderCryptoCard)
-}
+const handleFetchSuccess = (cryptoObject) => cryptoObject.data.forEach(renderCryptoCard)
 
 const renderCryptoCard = (crypto) => {  
   const cardDiv = document.createElement('div')
@@ -60,7 +56,7 @@ const renderCryptoCard = (crypto) => {
     </div>
     <div class="d-flex w-100 justify-content-between align-items-center px-3 py-2">
     <div class="price-container px-3">
-      <div class="icon-text">Price: ${priceFormatter.format(crypto.priceUsd)}</div>
+      <div class="icon-text">Current Price: ${priceFormatter.format(crypto.priceUsd)}</div>
     </div>
     <div class="px-3">
       <button type="button" id="chart-${crypto.id}" data-name="${crypto.name}" 
@@ -122,11 +118,9 @@ const constructChartData = (priceHistory, cryptoName) => {
     chartPriceData.push(interval.priceUsd)
     chartLabels.push(interval.date.slice(0,10))
   })
-  // console.log(chartPriceData)
   if(chartInstance){
     chartInstance.destroy()
   }
-
   chartInstance = new Chart(ctx, {
     type: 'line',
     data: {
@@ -147,11 +141,9 @@ const constructChartData = (priceHistory, cryptoName) => {
   });
 }
 
-// constructChartData(cryptoHistory)
-
 const initApp = () => {
-  handleFetchSuccess(cryptoData)
-  // getCryptoDataFromAPI()
+  // handleFetchSuccess(cryptoData)
+  getCryptoDataFromAPI()
   navLinks.forEach(link => link.addEventListener('click', navigatePageViews))
 }
 
