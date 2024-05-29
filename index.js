@@ -8,10 +8,11 @@ const addFundsBtn = document.querySelector('#add-funds-button')
 const searchCryptoBtn = document.querySelector('#search-crypto-button')
 const buyBtn = document.querySelector('#buy-crypto-button')
 const buyInputField = document.querySelector('#crypto-buy-input')
-let chartInstance
 
+let chartInstance
 let globalWallet = {}
 let globalSearchResult
+let globalScan
 let globalTransactions
 
 const navigatePageViews = (e) => {
@@ -49,13 +50,37 @@ const getTransactions = () => {
 }
 
 const handleGetTransactionsSuccess = (transactionsArray) => {
-  globalTransactions = transactionsArray
-  //Just like green grocer we need a globalHoldings object
-  //It will hold each crypto and the value of it today
+  globalTransactions = transactionsArray//Might not need this
+  const holdingsObject = {}
+  transactionsArray.forEach(transaction => {
+    if(holdingsObject.hasOwnProperty(transaction.crypto)){
+      const ourSpecificCryptosMarketPrice = globalScan.find(crypto => crypto.id === transaction.crypto).priceUsd
+      holdingsObject[transaction.crypto].tokens += transaction.tokensAmount
+      const currentTokensValue = ourSpecificCryptosMarketPrice * transaction.tokensAmount
+      // console.log(currentTokensValue)
+      holdingsObject[transaction.crypto].marketValue += currentTokensValue 
+    }else{
+      holdingsObject[transaction.crypto] = {
+        tokens: transaction.tokensAmount,
+        marketValue: transaction.buyAmount
+      }
+    }
+  })
+  renderTable(holdingsObject)
 }
 
-const renderTable = (transaction) => {
-
+const renderTable = (holdingsObject) => {
+  for(const holding in holdingsObject){
+    console.log(holdingsObject[holding])
+    const tr = document.createElement('tr')
+    const value = usdFormatter.format(holdingsObject[holding].marketValue)
+    tr.innerHTML = `
+      <td>${holding}</td>
+      <td>${holdingsObject[holding].tokens}</td>
+      <td>${value}</td>
+      `
+    document.querySelector('#holdings-table tbody').appendChild(tr)
+  }
 }
 
 const handleFundsSubmit = () => {
@@ -176,14 +201,17 @@ const last24HrFormatter = (crypto) => {
   }
 }
 
-const handleFetchSuccess = (cryptoObject) => cryptoObject.data.forEach(renderCryptoCard)
+const handleFetchSuccess = (cryptoObject) => {
+  globalScan = cryptoObject.data
+  cryptoObject.data.forEach(renderCryptoCard)
+  getTransactions()
+}
 
 const renderWalletBalance = (walletInfo) => {
   globalWallet = walletInfo[0]
   const walletElem = document.querySelector('#wallet-balance')
   const balanceUsd = usdFormatter.format(walletInfo[0].amount)
   walletElem.textContent = balanceUsd
-  // console.log('Global wallet after re-render:',globalWallet)
 }
 
 const renderCryptoCard = (crypto) => {  
@@ -224,7 +252,6 @@ const chartSelectedCrypto = (e) => {
 
 const navigateToChart = (cryptoToChart) => {
   document.querySelector('#nav-link-chart').childNodes[0].click()
-  // console.log(document.querySelector('#nav-link-chart').childNodes[0])
   const chartInfo = document.querySelector('#chart-info')
   chartInfo.innerHTML =`
     <div class="d-flex">
@@ -236,13 +263,9 @@ const navigateToChart = (cryptoToChart) => {
 }
 
 const fetchCryptoHistory = (cryptoId, interval, cryptoName) => {
-  // Get the start of the year
 const startOfYear = new Date(new Date().getFullYear(), 0, 1).getTime();
-// Get the current time
 const currentTime = Date.now();
-// Construct the query URL
 const baseUrl = `https://api.coincap.io/v2/assets/${cryptoId}/history`
-//const interval = 'd1'; // daily interval
 const query = `?interval=${interval}&start=${startOfYear}&end=${currentTime}`;
 const endpoint = `${baseUrl}${query}`;
 
@@ -289,7 +312,7 @@ const constructChartData = (priceHistory, cryptoName) => {
 const initApp = () => {
   handleFetchSuccess(cryptoData)
   getWalletInfo()
-  getTransactions()
+  // getTransactions()
   // getCryptoDataFromAPI()
   navLinks.forEach(link => link.addEventListener('click', navigatePageViews))
   addFundsBtn.addEventListener('click', handleFundsSubmit)
