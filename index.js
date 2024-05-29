@@ -5,6 +5,7 @@ const allCryptoList = document.querySelector('#all-crypto-list')
 const navLinks = document.querySelectorAll('.nav-link')
 const ctx = document.getElementById('myChart');
 const addFundsBtn = document.querySelector('#add-funds-button')
+const searchCryptoBtn = document.querySelector('#search-crypto-button')
 let chartInstance
 
 let globalWallet = {}
@@ -36,10 +37,33 @@ const getWalletInfo = () => {
     .catch(handleError)
 }
 
-const handleFundsSubmit = (e) => {
+const handleFundsSubmit = () => {
   let fundsAmount = parseInt(document.querySelector('#funds-input').value)
   fundsAmount += globalWallet.amount
   isNaN(fundsAmount) ? alert('Please enter a valid amount') : patchFundsToWallet(fundsAmount)
+}
+
+const handleSearchCrypto = () => {
+  const tokenName = document.querySelector('#crypto-search-input').value
+  tokenName === '' ? alert('Please enter a valid crypto currency') : getCryptoPricing(tokenName)
+}
+
+const getCryptoPricing = (tokenName) => {
+  fetch(`https://api.coincap.io/v2/assets/${tokenName}`)
+    .then(res => res.json())
+    .then(handleGetPricingSuccess)
+    .catch(handleError)
+}
+
+const handleGetPricingSuccess = (cryptoData) => {
+  console.log(cryptoData)
+  const searchResult = document.querySelector('#search-result')
+  searchResult.textContent = ''
+  if(cryptoData.error){
+    searchResult.textContent = cryptoData.error
+  }else{
+    searchResult.textContent = `Current Price: ${usdFormatter.format(cryptoData.data.priceUsd)}`
+  }
 }
 
 const patchFundsToWallet = (fundsAmount) => {
@@ -183,6 +207,7 @@ const initApp = () => {
   // getCryptoDataFromAPI()
   navLinks.forEach(link => link.addEventListener('click', navigatePageViews))
   addFundsBtn.addEventListener('click', handleFundsSubmit)
+  searchCryptoBtn.addEventListener('click', handleSearchCrypto)
 }
 
 initApp()
