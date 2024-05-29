@@ -4,12 +4,14 @@ import { cryptoHistory } from "./history.js";
 const allCryptoList = document.querySelector('#all-crypto-list')
 const navLinks = document.querySelectorAll('.nav-link')
 const ctx = document.getElementById('myChart');
+const addFundsBtn = document.querySelector('#add-funds-button')
 let chartInstance
 
+let globalWallet = {}
+
 const navigatePageViews = (e) => {
-  // console.log('navigatePageViews')
-  const activeLink = e.target.id.split('-')[2]
-  const allViewIds = ['scanner', 'chart', 'transact']
+  const activeLink = e.target.parentElement.id.split('-')[2]
+  const allViewIds = ['scanner', 'chart', 'wallet']
   allViewIds.forEach(id => document.getElementById(`${id}`).style.display = 'none')
   document.getElementById(`${activeLink}`).style.display = 'block'
   navLinks.forEach(link => link.classList.remove('active'))
@@ -17,7 +19,7 @@ const navigatePageViews = (e) => {
 
 const handleError = (error) => {
   console.log(error)
-  alert('Something wen wrong during fetch!')
+  alert('Something went wrong while trying to retrieve data!')
 }
 
 const getCryptoDataFromAPI = () => {
@@ -27,7 +29,32 @@ const getCryptoDataFromAPI = () => {
     .catch(handleError)
 }
 
-const priceFormatter = new Intl.NumberFormat('en-US', {
+const getWalletInfo = () => {
+  fetch('http://localhost:3000/wallet')
+    .then(res => res.json())
+    .then(renderWalletBalance)
+    .catch(handleError)
+}
+
+const handleFundsSubmit = (e) => {
+  let fundsAmount = parseInt(document.querySelector('#funds-input').value)
+  fundsAmount += globalWallet.amount
+  isNaN(fundsAmount) ? alert('Please enter a valid amount') : patchFundsToWallet(fundsAmount)
+}
+
+const patchFundsToWallet = (fundsAmount) => {
+  fetch('http://localhost:3000/wallet/balance',{
+  method: "PATCH",
+  headers: {'Content-Type': 'application/json'},
+  body: JSON.stringify({amount: fundsAmount})
+  })
+    .then(res => res.json())
+    .then(data => renderWalletBalance([data]))
+    .catch(handleError)
+  document.querySelector('#funds-input').value = ''
+}
+
+const usdFormatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
   currency: 'USD',
 });
@@ -40,8 +67,14 @@ const last24HrFormatter = (crypto) => {
   }
 }
 
-const handleFetchSuccess = (cryptoObject) => {
-  cryptoObject.data.forEach(renderCryptoCard)
+const handleFetchSuccess = (cryptoObject) => cryptoObject.data.forEach(renderCryptoCard)
+
+const renderWalletBalance = (walletInfo) => {
+  globalWallet = walletInfo[0]
+  const walletElem = document.querySelector('#wallet-balance')
+  const balanceUsd = usdFormatter.format(walletInfo[0].amount)
+  walletElem.textContent = balanceUsd
+  console.log('Global wallet after re-render:',globalWallet)
 }
 
 const renderCryptoCard = (crypto) => {  
@@ -59,7 +92,7 @@ const renderCryptoCard = (crypto) => {
     </div>
     <div class="d-flex w-100 justify-content-between align-items-center px-3 py-2">
     <div class="price-container px-3">
-      <div class="icon-text">Price: ${priceFormatter.format(crypto.priceUsd)}</div>
+      <div class="icon-text">Current Price: ${usdFormatter.format(crypto.priceUsd)}</div>
     </div>
     <div class="px-3">
       <button type="button" id="chart-${crypto.id}" data-name="${crypto.name}" 
@@ -81,8 +114,8 @@ const chartSelectedCrypto = (e) => {
 }
 
 const navigateToChart = (cryptoToChart) => {
-  document.querySelector('#nav-link-chart').click()
-  console.log(cryptoToChart)
+  document.querySelector('#nav-link-chart').childNodes[0].click()
+  // console.log(document.querySelector('#nav-link-chart').childNodes[0])
   const chartInfo = document.querySelector('#chart-info')
   chartInfo.innerHTML =`
     <div class="d-flex">
@@ -121,11 +154,9 @@ const constructChartData = (priceHistory, cryptoName) => {
     chartPriceData.push(interval.priceUsd)
     chartLabels.push(interval.date.slice(0,10))
   })
-  console.log(chartPriceData)
   if(chartInstance){
     chartInstance.destroy()
   }
-
   chartInstance = new Chart(ctx, {
     type: 'line',
     data: {
@@ -146,12 +177,12 @@ const constructChartData = (priceHistory, cryptoName) => {
   });
 }
 
-// constructChartData(cryptoHistory)
-
 const initApp = () => {
   handleFetchSuccess(cryptoData)
+  getWalletInfo()
   // getCryptoDataFromAPI()
   navLinks.forEach(link => link.addEventListener('click', navigatePageViews))
+  addFundsBtn.addEventListener('click', handleFundsSubmit)
 }
 
 initApp()
