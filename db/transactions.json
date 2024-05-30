@@ -367,6 +367,16 @@
       "transactionType": "sell",
       "tokensAmount": 16.653018093666482,
       "todaysDate": "05/30/2024"
+    },
+    {
+      "id": "d8a7",
+      "buyAmount": 50000,
+      "tokensAmount": 0.7220662072040374,
+      "currentPrice": 69245.72774788682,
+      "todaysDate": "05/30/2024",
+      "crypto": "bitcoin",
+      "transactionType": "buy",
+      "buyValue": 50000
     }
   ]
 }

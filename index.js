@@ -185,7 +185,7 @@ const renderCryptoCard = (crypto) => {
   cardDiv.classList.add('crypto-card', 'mb-3')
   cardDiv.innerHTML = `
   <div class="icon">
-        <img width="50px" alt="${crypto.id}" src="./64/${crypto.id}.png" />
+        <img width="50px" alt="${crypto.id}" src="./src/images/64/${crypto.id}.png" />
     </div>
     <div class="details">
       <div class="title">${crypto.name}</div>
@@ -199,7 +199,7 @@ const renderCryptoCard = (crypto) => {
     </div>
     <div class="px-3">
       <button type="button" id="chart-${crypto.id}" data-name="${crypto.name}" 
-        data-icon="./64/${crypto.id}.png" data-ticker="${crypto.id}" class="btn btn-secondary text-nowrap">
+        data-icon="./src/images/64/${crypto.id}.png" data-ticker="${crypto.id}" class="btn btn-secondary text-nowrap">
         Chart
       </button>
     </div>
