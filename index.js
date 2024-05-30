@@ -91,10 +91,18 @@ const renderTable = (holdingsObject) => {
   }
 }
 
-const handleFundsSubmit = () => {
+const handleUpdateWallet = (updateType) => {
   let fundsAmount = parseInt(document.querySelector('#funds-input').value)
-  fundsAmount += globalWallet.amount
-  isNaN(fundsAmount) ? alert('Please enter a valid amount') : patchFundsToWallet(fundsAmount)
+  let buyAmount = parseFloat(document.querySelector('#crypto-buy-input').value)
+  let updateWalletToThisAmount
+  if(updateType === 'add'){
+    updateWalletToThisAmount = fundsAmount + globalWallet.amount
+    isNaN(fundsAmount) ? alert('Please enter a valid amount') : patchFundsToWallet(updateWalletToThisAmount)
+  }else{
+    updateWalletToThisAmount = globalWallet.amount - buyAmount
+    isNaN(buyAmount) ? alert('Amount to buy is invalid') : patchFundsToWallet(updateWalletToThisAmount)
+  } 
+  
 }
 
 const handleSearchCrypto = () => {
@@ -122,7 +130,7 @@ const handleBuyCrypto = () => {
     todaysDate: getCurrentDateFormatted(),
     crypto: globalSearchResult.id
   }
-  buyInfo.buyValue = buyInfo.tokensAmount * buyInfo.currentPrice
+  buyInfo.buyValue = parseFloat(document.querySelector('#crypto-buy-input').value)
   if(buyInfo.buyAmount <= globalWallet.amount){
     // console.log('You have enough to buy')
     if(!globalSearchResult){
@@ -150,11 +158,12 @@ const postBuyTransaction = (buyInfo) => {
 }
 
 const handleBuySuccess = () => {
+  //Update wallet to reflect the recent purchase
+  handleUpdateWallet('reduce')
   document.querySelector('#crypto-search-input').value = ''
   document.querySelector('#crypto-buy-input').value = ''
   document.querySelector('#search-result').textContent = '-'
   document.querySelector('#tokens-amount').textContent = 'Order submitted successfully!'
-  //Render table
   document.querySelector('#holdings-table tbody').innerHTML = ''
   getTransactions()
 }
@@ -326,7 +335,7 @@ const initApp = () => {
   // getTransactions()
   // getCryptoDataFromAPI()
   navLinks.forEach(link => link.addEventListener('click', navigatePageViews))
-  addFundsBtn.addEventListener('click', handleFundsSubmit)
+  addFundsBtn.addEventListener('click', () => handleUpdateWallet('add'))
   searchCryptoBtn.addEventListener('click', handleSearchCrypto)
   buyBtn.addEventListener('click', handleBuyCrypto)
   buyInputField.addEventListener('input', handleBuyInputChange)
