@@ -173,6 +173,102 @@
       "transactionType": "sell",
       "tokensAmount": 0.15,
       "todaysDate": "05/30/2024"
+    },
+    {
+      "id": "c2e8",
+      "crypto": "binance-coin",
+      "currentPrice": "598.3436461570566565",
+      "transactionType": "sell",
+      "tokensAmount": 0.02245299217605279,
+      "todaysDate": "05/30/2024"
+    },
+    {
+      "id": "1174",
+      "crypto": "ethereum",
+      "currentPrice": "3815.8090509258826314",
+      "transactionType": "sell",
+      "tokensAmount": 4,
+      "todaysDate": "05/30/2024"
+    },
+    {
+      "id": "dd93",
+      "crypto": "ethereum",
+      "currentPrice": "3815.5268758934323904",
+      "transactionType": "sell",
+      "tokensAmount": 0.2947111486002303,
+      "todaysDate": "05/30/2024"
+    },
+    {
+      "id": "0ee1",
+      "buyAmount": 25000,
+      "tokensAmount": 41.758467305808026,
+      "currentPrice": 598.6809768883171,
+      "todaysDate": "05/30/2024",
+      "crypto": "binance-coin",
+      "transactionType": "buy",
+      "buyValue": 25000
+    },
+    {
+      "id": "2530",
+      "crypto": "binance-coin",
+      "currentPrice": "598.6483032545149727",
+      "transactionType": "sell",
+      "tokensAmount": 41.758467305808026,
+      "todaysDate": "05/30/2024"
+    },
+    {
+      "id": "a9f3",
+      "buyAmount": 25000,
+      "tokensAmount": 25002.954134150546,
+      "currentPrice": 0.9998818485953821,
+      "todaysDate": "05/30/2024",
+      "crypto": "tether",
+      "transactionType": "buy",
+      "buyValue": 25000
+    },
+    {
+      "id": "f46b",
+      "crypto": "tether",
+      "currentPrice": "0.9997929156928472",
+      "transactionType": "sell",
+      "tokensAmount": 10000,
+      "todaysDate": "05/30/2024"
+    },
+    {
+      "id": "b64c",
+      "buyAmount": 10000,
+      "tokensAmount": 2.623288480244185,
+      "currentPrice": 3812.0092682559884,
+      "todaysDate": "05/30/2024",
+      "crypto": "ethereum",
+      "transactionType": "buy",
+      "buyValue": 10000
+    },
+    {
+      "id": "0bb7",
+      "crypto": "tether",
+      "currentPrice": "0.9998613988719586",
+      "transactionType": "sell",
+      "tokensAmount": 15002.954134150546,
+      "todaysDate": "05/30/2024"
+    },
+    {
+      "id": "f043",
+      "crypto": "ethereum",
+      "currentPrice": "3813.6814314771389241",
+      "transactionType": "sell",
+      "tokensAmount": 2.623288480244185,
+      "todaysDate": "05/30/2024"
+    },
+    {
+      "id": "eedb",
+      "buyAmount": 40000,
+      "tokensAmount": 244768.11153255365,
+      "currentPrice": 0.1634199804441441,
+      "todaysDate": "05/30/2024",
+      "crypto": "dogecoin",
+      "transactionType": "buy",
+      "buyValue": 40000
     }
   ]
 }

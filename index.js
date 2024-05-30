@@ -1,6 +1,3 @@
-import { cryptoData } from "./api_data.js"
-import { cryptoHistory } from "./history.js";
-
 const allCryptoList = document.querySelector('#all-crypto-list')
 const navLinks = document.querySelectorAll('.nav-link')
 const ctx = document.getElementById('myChart');
@@ -9,29 +6,22 @@ const searchCryptoBtn = document.querySelector('#search-crypto-button')
 const buyBtn = document.querySelector('#buy-crypto-button')
 const buyInputField = document.querySelector('#crypto-buy-input')
 const sellBtn = document.querySelector('#sell_button')
+const refreshBtn = document.querySelector('#refresh-holdings-button')
 
 let chartInstance
 let globalWallet = {}
 let globalSearchResult
 let globalScan
-let globalTransactions
 
 const navigatePageViews = (e) => {
-  console.log(e.target)
-  console.log(e.target.parentElement.id)
-
   const activeLink = e.target.parentElement.id.split('-')[2]
   const allViewIds = ['scanner', 'chart', 'wallet']
-  
   allViewIds.forEach(id => document.getElementById(`${id}`).style.display = 'none')
   document.getElementById(`${activeLink}`).style.display = 'block'
-  //navLinks.forEach(link => link.classList.remove('active'))
+  navLinks.forEach(link => link.classList.remove('active'))
 }
 
-const handleError = (error) => {
-  console.log(error)
-  alert('Something went wrong while trying to retrieve data!')
-}
+const handleError = () => alert('Something went wrong while trying to retrieve data!')
 
 const getCryptoDataFromAPI = () => {
   fetch('https://api.coincap.io/v2/assets')
@@ -54,10 +44,14 @@ const getTransactions = () => {
     .catch(handleError)
 }
 
+const handleFetchSuccess = (cryptoObject) => {
+  globalScan = cryptoObject.data
+  cryptoObject.data.forEach(renderCryptoCard)
+  getTransactions()
+}
+
 const handleGetTransactionsSuccess = (transactionsArray) => {
-  globalTransactions = transactionsArray//Might not need this
-  const holdingsObject = {}
-  //Handle buy and sell transactions
+  let holdingsObject = {}
   transactionsArray.forEach(transaction => {
     const ourSpecificCryptosMarketPrice = globalScan.find(crypto => crypto.id === transaction.crypto).priceUsd
     if(holdingsObject.hasOwnProperty(transaction.crypto)){
@@ -84,17 +78,16 @@ const handleGetTransactionsSuccess = (transactionsArray) => {
       }
     }
   })
-  // console.log(holdingsObject)
   renderTable(holdingsObject)
 }
 
 const renderTable = (holdingsObject) => {
+  document.querySelector('#holdings-table tbody').innerHTML = ''
   for(const holding in holdingsObject){
     const tr = document.createElement('tr')
     const value = usdFormatter.format(holdingsObject[holding].marketValue)
     const currentPrice = usdFormatter.format(globalScan.find(item => item.id === holding).priceUsd)
     const nameOfHolding = holding.charAt(0).toUpperCase() + holding.slice(1)
-    console.log(currentPrice)
     if(holdingsObject[holding].marketValue >= 0.02){
       tr.innerHTML = `
       <td>${nameOfHolding}</td>
@@ -114,8 +107,7 @@ const handleSellModal = (e, holding, availableTokensToSell) => {
     .then(res => res.json())
     .then(cryptoData => {
       globalSearchResult = cryptoData.data
-      const sellInput = document.querySelector('#crypto-sell-input').addEventListener('input', (e) => updateSaleValue(e, availableTokensToSell))
-      // console.log(e, holding, availableTokensToSell)
+      document.querySelector('#crypto-sell-input').addEventListener('input', (e) => updateSaleValue(e, availableTokensToSell))
       const currentUSDPrice = usdFormatter.format(cryptoData.data.priceUsd) 
       document.querySelector('#token-id').innerHTML = `Token: <strong>${holding.charAt(0).toUpperCase() + holding.slice(1)}</strong>`
       document.querySelector('#token-market-price').textContent = `Current price: ${currentUSDPrice}`
@@ -127,7 +119,7 @@ const handleSellModal = (e, holding, availableTokensToSell) => {
 const updateSaleValue = (e, availableTokensToSell) => {
   const sellAmount = e.target.value
   const marketPrice = globalSearchResult.priceUsd
-  console.log('sellAmount: ',sellAmount, 'Market price: ' , marketPrice)
+  // console.log('sellAmount: ',sellAmount, 'Market price: ' , marketPrice)
   const saleValue = sellAmount * marketPrice
   if(sellAmount > availableTokensToSell){
     document.querySelector('#sale-value').textContent = `You can't sell what you don't have`
@@ -165,7 +157,6 @@ const handleBuyInputChange = (e) => {
   const buyAmount = e.target.value
   let tokensToBuy
   if(globalSearchResult){
-    // console.log(globalSearchResult)
     tokensToBuy = (buyAmount / globalSearchResult.priceUsd)
     const tokensAmount = document.querySelector('#tokens-amount')
     tokensAmount.textContent = 
@@ -188,7 +179,6 @@ const handleBuyCrypto = () => {
   }
   buyInfo.buyValue = parseFloat(document.querySelector('#crypto-buy-input').value)
   if(buyInfo.buyAmount <= globalWallet.amount){
-    // console.log('You have enough to buy')
     if(!globalSearchResult){
       alert('You need to first search a crypto currency')
     }else{
@@ -279,7 +269,6 @@ const getCryptoPricing = (tokenName) => {
 }
 
 const renderSearchResult = (cryptoData) => {
-  // console.log(cryptoData)
   const searchResult = document.querySelector('#search-result')
   searchResult.textContent = ''
   if(cryptoData.error){
@@ -315,16 +304,10 @@ const last24HrFormatter = (crypto) => {
   }
 }
 
-const handleFetchSuccess = (cryptoObject) => {
-  globalScan = cryptoObject.data
-  cryptoObject.data.forEach(renderCryptoCard)
-  getTransactions()
-}
-
 const renderWalletBalance = (walletInfo) => {
   globalWallet = walletInfo[0]
   const walletElem = document.querySelector('#wallet-balance')
-  const balanceUsd = usdFormatter.format(walletInfo[0].amount)
+  const balanceUsd = usdFormatter.format(globalWallet.amount)
   walletElem.textContent = balanceUsd
 }
 
@@ -382,8 +365,7 @@ const navigateToChart = (cryptoToChart) => {
     <div class="d-flex">
         <img width="50px" alt="${cryptoToChart.name}" src="${cryptoToChart.icon}" />
     <h1 class="px-3">${cryptoToChart.name}</h1>
-    </div>
-    `
+    </div>`
   fetchCryptoHistory(cryptoToChart.ticker, 'd1', cryptoToChart.name)
 }
 
@@ -400,9 +382,7 @@ const endpoint = `${baseUrl}${query}`;
     .catch(handleError)
 }
 
-const renderChart = (priceHistory, cryptoName) => {
-  constructChartData(priceHistory, cryptoName)
-}
+const renderChart = (priceHistory, cryptoName) => constructChartData(priceHistory, cryptoName)
 
 const constructChartData = (priceHistory, cryptoName) => {
   const chartPriceData = []
@@ -434,10 +414,10 @@ const constructChartData = (priceHistory, cryptoName) => {
   });
 }
 
+const refreshCurrentHoldingsTable = () => getCryptoDataFromAPI()
+
 const initApp = () => {
-  // handleFetchSuccess(cryptoData)
   getWalletInfo()
-  // getTransactions()
   getCryptoDataFromAPI()
   navLinks.forEach(link => link.addEventListener('click', navigatePageViews))
   addFundsBtn.addEventListener('click', () => handleUpdateWallet('add'))
@@ -445,6 +425,7 @@ const initApp = () => {
   buyBtn.addEventListener('click', handleBuyCrypto)
   buyInputField.addEventListener('input', handleBuyInputChange)
   sellBtn.addEventListener('click', handleSellCrypto)
+  refreshBtn.addEventListener('click', refreshCurrentHoldingsTable)
 }
 
 initApp()
