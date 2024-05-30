@@ -397,6 +397,24 @@
       "crypto": "solana",
       "transactionType": "buy",
       "buyValue": 1000
+    },
+    {
+      "id": "cfe0",
+      "crypto": "bitcoin",
+      "currentPrice": "68327.5679940146454934",
+      "transactionType": "sell",
+      "tokensAmount": 0.7220662072040374,
+      "todaysDate": "05/30/2024"
+    },
+    {
+      "id": "e80d",
+      "buyAmount": 50000,
+      "tokensAmount": 0.731769057028049,
+      "currentPrice": 68327.56799401465,
+      "todaysDate": "05/30/2024",
+      "crypto": "bitcoin",
+      "transactionType": "buy",
+      "buyValue": 50000
     }
   ]
 }

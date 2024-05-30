@@ -1,6 +1,6 @@
 const allCryptoList = document.querySelector('#all-crypto-list')
 const navLinks = document.querySelectorAll('.nav-link')
-const ctx = document.getElementById('myChart');
+const ctx = document.getElementById('myChart')
 const addFundsBtn = document.querySelector('#add-funds-button')
 const searchCryptoBtn = document.querySelector('#search-crypto-button')
 const buyBtn = document.querySelector('#buy-crypto-button')
@@ -321,7 +321,7 @@ const handleSellCrypto = () => {
 }
 
 const currentDateFormatter= () => {
-  const date = new Date();
+  const date = new Date()
   const month = (date.getMonth() + 1).toString().padStart(2, '0')
   const day = date.getDate().toString().padStart(2, '0')
   const year = date.getFullYear()
@@ -332,7 +332,7 @@ const currentDateFormatter= () => {
 const usdFormatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
   currency: 'USD',
-});
+})
 
 const last24HrFormatter = (crypto) => {
   if(crypto.changePercent24Hr.slice(0,1) === '-'){
@@ -369,11 +369,11 @@ const navigateToChart = (cryptoToChart) => {
 }
 
 const fetchCryptoHistory = (cryptoId, interval, cryptoName) => {
-  const startOfYear = new Date(new Date().getFullYear(), 0, 1).getTime();
-  const currentTime = Date.now();
+  const startOfYear = new Date(new Date().getFullYear(), 0, 1).getTime()
+  const currentTime = Date.now()
   const baseUrl = `https://api.coincap.io/v2/assets/${cryptoId}/history`
-  const query = `?interval=${interval}&start=${startOfYear}&end=${currentTime}`;
-  const endpoint = `${baseUrl}${query}`;
+  const query = `?interval=${interval}&start=${startOfYear}&end=${currentTime}`
+  const endpoint = `${baseUrl}${query}`
     fetch(endpoint)
       .then(res => res.json())
       .then(data => renderChart(data, cryptoName))
@@ -409,7 +409,7 @@ const constructChartData = (priceHistory, cryptoName) => {
         }
       }
     }
-  });
+  })
 }
 
 const refreshCurrentHoldingsTable = () => getCryptoDataFromAPI()
