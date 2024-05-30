@@ -44,6 +44,47 @@ const getTransactions = () => {
     .catch(handleError)
 }
 
+const getCryptoPricing = (tokenName) => {
+  fetch(`https://api.coincap.io/v2/assets/${tokenName}`)
+    .then(res => res.json())
+    .then(renderSearchResult)
+    .catch(handleError)
+}
+
+const postSellTransaction = (sellInfo) => {
+  fetch('http://localhost:3001/transactions',{
+  method: "POST",
+  headers: {'Content-Type': 'application/json'},
+  body: JSON.stringify(sellInfo)
+  })
+    .then(res => res.json())
+    .then(handleSellSuccess)
+    .catch(handleError)
+}
+
+const postBuyTransaction = (buyInfo) => {
+  fetch('http://localhost:3001/transactions',{
+  method: "POST",
+  headers: {'Content-Type': 'application/json'},
+  body: JSON.stringify(buyInfo)
+  })
+    .then(res => res.json())
+    .then(handleBuySuccess)
+    .catch(handleError)
+}
+
+const patchFundsToWallet = (fundsAmount) => {
+  fetch('http://localhost:3000/wallet/balance',{
+  method: "PATCH",
+  headers: {'Content-Type': 'application/json'},
+  body: JSON.stringify({amount: fundsAmount})
+  })
+    .then(res => res.json())
+    .then(data => renderWalletBalance([data]))
+    .catch(handleError)
+  document.querySelector('#funds-input').value = ''
+}
+
 const handleFetchSuccess = (cryptoObject) => {
   globalScan = cryptoObject.data
   cryptoObject.data.forEach(renderCryptoCard)
@@ -81,6 +122,26 @@ const handleGetTransactionsSuccess = (transactionsArray) => {
   renderTable(holdingsObject)
 }
 
+const handleSellSuccess = () => {
+  handleUpdateWallet('sell')
+  document.querySelector('#crypto-sell-input').value = ''
+  document.querySelector('#available-tokens').value = ''
+  document.querySelector('#holdings-table tbody').innerHTML = ''
+  document.querySelector('#sale-value').textContent = 'Order submitted successfully!'
+  document.querySelector('#sell_button').style.display = 'none'
+  getTransactions()
+}
+
+const handleBuySuccess = () => {
+  handleUpdateWallet('reduce')
+  document.querySelector('#crypto-search-input').value = ''
+  document.querySelector('#crypto-buy-input').value = ''
+  document.querySelector('#search-result').textContent = '-'
+  document.querySelector('#tokens-amount').textContent = 'Order submitted successfully!'
+  document.querySelector('#holdings-table tbody').innerHTML = ''
+  getTransactions()
+}
+
 const renderTable = (holdingsObject) => {
   document.querySelector('#holdings-table tbody').innerHTML = ''
   for(const holding in holdingsObject){
@@ -101,173 +162,6 @@ const renderTable = (holdingsObject) => {
   }
 }
 
-const handleSellModal = (e, holding, availableTokensToSell) => {
-  sellBtn.style.display = 'block'
-  fetch(`https://api.coincap.io/v2/assets/${holding}`)
-    .then(res => res.json())
-    .then(cryptoData => {
-      globalSearchResult = cryptoData.data
-      document.querySelector('#crypto-sell-input').addEventListener('input', (e) => updateSaleValue(e, availableTokensToSell))
-      const currentUSDPrice = usdFormatter.format(cryptoData.data.priceUsd) 
-      document.querySelector('#token-id').innerHTML = `Token: <strong>${holding.charAt(0).toUpperCase() + holding.slice(1)}</strong>`
-      document.querySelector('#token-market-price').textContent = `Current price: ${currentUSDPrice}`
-      document.querySelector('#available-tokens').textContent = `Available tokens to sell: ${availableTokensToSell}`
-    })
-    .catch(handleError) 
-}
-
-const updateSaleValue = (e, availableTokensToSell) => {
-  const sellAmount = e.target.value
-  const marketPrice = globalSearchResult.priceUsd
-  // console.log('sellAmount: ',sellAmount, 'Market price: ' , marketPrice)
-  const saleValue = sellAmount * marketPrice
-  if(sellAmount > availableTokensToSell){
-    document.querySelector('#sale-value').textContent = `You can't sell what you don't have`
-  }else if(isNaN(saleValue)){
-    document.querySelector('#sale-value').textContent = `Enter a valid number`
-  }else{
-    document.querySelector('#sale-value').textContent = usdFormatter.format(saleValue)
-  }
-}
-
-const handleUpdateWallet = (updateType) => {
-  let fundsAmount = parseInt(document.querySelector('#funds-input').value)
-  let buyAmount = parseFloat(document.querySelector('#crypto-buy-input').value)
-  let sellAmount = document.querySelector('#sale-value').textContent
-  sellAmount = parseFloat(sellAmount.replace('$', '').replace(/,/g, ''))
-  let updateWalletToThisAmount
-  if(updateType === 'add'){
-    updateWalletToThisAmount = fundsAmount + globalWallet.amount
-    isNaN(fundsAmount) ? alert('Please enter a valid amount') : patchFundsToWallet(updateWalletToThisAmount)
-  }else if(updateType === 'sell'){
-    updateWalletToThisAmount = sellAmount + globalWallet.amount
-    patchFundsToWallet(updateWalletToThisAmount)
-  }else{
-    updateWalletToThisAmount = globalWallet.amount - buyAmount
-    isNaN(buyAmount) ? alert('Amount to buy is invalid') : patchFundsToWallet(updateWalletToThisAmount)
-  } 
-}
-
-const handleSearchCrypto = () => {
-  const tokenName = document.querySelector('#crypto-search-input').value.toLowerCase()
-  tokenName === '' ? alert('Please enter a valid crypto currency') : getCryptoPricing(tokenName)
-}
-
-const handleBuyInputChange = (e) => {
-  const buyAmount = e.target.value
-  let tokensToBuy
-  if(globalSearchResult){
-    tokensToBuy = (buyAmount / globalSearchResult.priceUsd)
-    const tokensAmount = document.querySelector('#tokens-amount')
-    tokensAmount.textContent = 
-      `Tokens to buy: ${tokensToBuy}`
-  }
-}
-
-const handleBuyCrypto = () => {
-  if(!globalSearchResult){
-    alert('You need to first search a crypto currency')
-    return
-  }
-  const buyInfo = {
-    buyAmount: parseInt(document.querySelector('#crypto-buy-input').value),
-    tokensAmount: parseFloat(document.querySelector('#tokens-amount').textContent.split(' ')[3]),
-    currentPrice: parseFloat(globalSearchResult.priceUsd),
-    todaysDate: getCurrentDateFormatted(),
-    crypto: globalSearchResult.id,
-    transactionType: 'buy'
-  }
-  buyInfo.buyValue = parseFloat(document.querySelector('#crypto-buy-input').value)
-  if(buyInfo.buyAmount <= globalWallet.amount){
-    if(!globalSearchResult){
-      alert('You need to first search a crypto currency')
-    }else{
-      postBuyTransaction(buyInfo)
-    }
-  }else if(isNaN(buyInfo.buyAmount)){
-    alert('Please enter a valid number')
-  }
-  else{
-    alert(`You're poor! Get some more funds!`)
-  }
-}
-
-const handleSellCrypto = () => {
-  document.querySelector('#sell_button').style.display = 'block'
-  const availableTokensToSell = document.querySelector('#available-tokens').textContent.split(' ')[4]
-  const tokensToSell = document.querySelector('#crypto-sell-input').value
-  const sellInfo = {
-    crypto: globalSearchResult.id,
-    currentPrice: globalSearchResult.priceUsd,
-    transactionType: 'sell',
-    tokensAmount: parseFloat(tokensToSell),
-    todaysDate: getCurrentDateFormatted(),
-  }
-  if(isNaN(tokensToSell) || tokensToSell === '' || tokensToSell > availableTokensToSell){
-    alert('Please enter how many tokens you want to sell')
-  }else{
-    postSellTransaction(sellInfo)
-  }
-}
-
-const postSellTransaction = (sellInfo) => {
-  fetch('http://localhost:3001/transactions',{
-  method: "POST",
-  headers: {'Content-Type': 'application/json'},
-  body: JSON.stringify(sellInfo)
-  })
-    .then(res => res.json())
-    .then(handleSellSuccess)
-    .catch(handleError)
-}
-
-const handleSellSuccess = () => {
-  handleUpdateWallet('sell')
-  document.querySelector('#crypto-sell-input').value = ''
-  document.querySelector('#available-tokens').value = ''
-  document.querySelector('#holdings-table tbody').innerHTML = ''
-  document.querySelector('#sale-value').textContent = 'Order submitted successfully!'
-  document.querySelector('#sell_button').style.display = 'none'
-  getTransactions()
-}
-
-const postBuyTransaction = (buyInfo) => {
-  fetch('http://localhost:3001/transactions',{
-  method: "POST",
-  headers: {'Content-Type': 'application/json'},
-  body: JSON.stringify(buyInfo)
-  })
-    .then(res => res.json())
-    .then(handleBuySuccess)
-    .catch(handleError)
-}
-
-const handleBuySuccess = () => {
-  handleUpdateWallet('reduce')
-  document.querySelector('#crypto-search-input').value = ''
-  document.querySelector('#crypto-buy-input').value = ''
-  document.querySelector('#search-result').textContent = '-'
-  document.querySelector('#tokens-amount').textContent = 'Order submitted successfully!'
-  document.querySelector('#holdings-table tbody').innerHTML = ''
-  getTransactions()
-}
-
-const getCurrentDateFormatted= () => {
-  const date = new Date();
-  const month = (date.getMonth() + 1).toString().padStart(2, '0')
-  const day = date.getDate().toString().padStart(2, '0')
-  const year = date.getFullYear()
-  const formattedDate = `${month}/${day}/${year}`
-  return formattedDate
-}
-
-const getCryptoPricing = (tokenName) => {
-  fetch(`https://api.coincap.io/v2/assets/${tokenName}`)
-    .then(res => res.json())
-    .then(renderSearchResult)
-    .catch(handleError)
-}
-
 const renderSearchResult = (cryptoData) => {
   const searchResult = document.querySelector('#search-result')
   searchResult.textContent = ''
@@ -276,31 +170,6 @@ const renderSearchResult = (cryptoData) => {
   }else{
     searchResult.textContent = `Current Price: ${usdFormatter.format(cryptoData.data.priceUsd)} - ${cryptoData.data.symbol}`
     globalSearchResult = cryptoData.data
-  }
-}
-
-const patchFundsToWallet = (fundsAmount) => {
-  fetch('http://localhost:3000/wallet/balance',{
-  method: "PATCH",
-  headers: {'Content-Type': 'application/json'},
-  body: JSON.stringify({amount: fundsAmount})
-  })
-    .then(res => res.json())
-    .then(data => renderWalletBalance([data]))
-    .catch(handleError)
-  document.querySelector('#funds-input').value = ''
-}
-
-const usdFormatter = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD',
-});
-
-const last24HrFormatter = (crypto) => {
-  if(crypto.changePercent24Hr.slice(0,1) === '-'){
-    return `${crypto.changePercent24Hr.slice(0,5)}`
-  }else{
-    return`+${crypto.changePercent24Hr.slice(0,4)}`
   }
 }
 
@@ -343,6 +212,135 @@ const renderCryptoCard = (crypto) => {
   document.getElementById(`buy_${crypto.id}`).addEventListener('click', searchSelectedCrypto)
 }
 
+const handleSellModal = (_e, holding, availableTokensToSell) => {
+  sellBtn.style.display = 'block'
+  fetch(`https://api.coincap.io/v2/assets/${holding}`)
+    .then(res => res.json())
+    .then(cryptoData => {
+      globalSearchResult = cryptoData.data
+      document.querySelector('#crypto-sell-input').addEventListener('input', (e) => updateSaleValue(e, availableTokensToSell))
+      const currentUSDPrice = usdFormatter.format(cryptoData.data.priceUsd) 
+      document.querySelector('#token-id').innerHTML = `Token: <strong>${holding.charAt(0).toUpperCase() + holding.slice(1)}</strong>`
+      document.querySelector('#token-market-price').textContent = `Current price: ${currentUSDPrice}`
+      document.querySelector('#available-tokens').textContent = `Available tokens to sell: ${availableTokensToSell}`
+    })
+    .catch(handleError) 
+}
+
+const updateSaleValue = (e, availableTokensToSell) => {
+  const sellAmount = e.target.value
+  const marketPrice = globalSearchResult.priceUsd
+  const saleValue = sellAmount * marketPrice
+  if(sellAmount > availableTokensToSell){
+    document.querySelector('#sale-value').textContent = `You can't sell what you don't have`
+  }else if(isNaN(saleValue)){
+    document.querySelector('#sale-value').textContent = `Enter a valid number`
+  }else{
+    document.querySelector('#sale-value').textContent = usdFormatter.format(saleValue)
+  }
+}
+
+const handleUpdateWallet = (updateType) => {
+  let fundsAmount = parseInt(document.querySelector('#funds-input').value)
+  let buyAmount = parseFloat(document.querySelector('#crypto-buy-input').value)
+  let sellAmount = document.querySelector('#sale-value').textContent
+  sellAmount = parseFloat(sellAmount.replace('$', '').replace(/,/g, ''))
+  let updateWalletToThisAmount
+  if(updateType === 'add'){
+    updateWalletToThisAmount = fundsAmount + globalWallet.amount
+    isNaN(fundsAmount) ? alert('Please enter a valid amount') : patchFundsToWallet(updateWalletToThisAmount)
+  }else if(updateType === 'sell'){
+    updateWalletToThisAmount = sellAmount + globalWallet.amount
+    patchFundsToWallet(updateWalletToThisAmount)
+  }else{
+    updateWalletToThisAmount = globalWallet.amount - buyAmount
+    isNaN(buyAmount) ? alert('Amount to buy is invalid') : patchFundsToWallet(updateWalletToThisAmount)
+  } 
+}
+
+const handleSearchCrypto = () => {
+  const tokenName = document.querySelector('#crypto-search-input').value.toLowerCase()
+  tokenName === '' ? alert('Please enter a valid crypto currency') : getCryptoPricing(tokenName)
+}
+
+const handleBuyInputChange = (e) => {
+  const buyAmount = e.target.value
+  let tokensToBuy
+  if(globalSearchResult){
+    tokensToBuy = (buyAmount / globalSearchResult.priceUsd)
+    const tokensAmount = document.querySelector('#tokens-amount')
+    tokensAmount.textContent = `Tokens to buy: ${tokensToBuy}`
+  }
+}
+
+const handleBuyCrypto = () => {
+  if(!globalSearchResult){
+    alert('You need to first search a crypto currency')
+    return
+  }
+  const buyInfo = {
+    buyAmount: parseInt(document.querySelector('#crypto-buy-input').value),
+    tokensAmount: parseFloat(document.querySelector('#tokens-amount').textContent.split(' ')[3]),
+    currentPrice: parseFloat(globalSearchResult.priceUsd),
+    todaysDate: currentDateFormatter(),
+    crypto: globalSearchResult.id,
+    transactionType: 'buy'
+  }
+  buyInfo.buyValue = parseFloat(document.querySelector('#crypto-buy-input').value)
+  if(buyInfo.buyAmount <= globalWallet.amount){
+    if(!globalSearchResult){
+      alert('You need to first search a crypto currency')
+    }else{
+      postBuyTransaction(buyInfo)
+    }
+  }else if(isNaN(buyInfo.buyAmount)){
+    alert('Please enter a valid number')
+  }
+  else{
+    alert(`You're poor! Get some more funds!`)
+  }
+}
+
+const handleSellCrypto = () => {
+  document.querySelector('#sell_button').style.display = 'block'
+  const availableTokensToSell = document.querySelector('#available-tokens').textContent.split(' ')[4]
+  const tokensToSell = document.querySelector('#crypto-sell-input').value
+  const sellInfo = {
+    crypto: globalSearchResult.id,
+    currentPrice: globalSearchResult.priceUsd,
+    transactionType: 'sell',
+    tokensAmount: parseFloat(tokensToSell),
+    todaysDate: currentDateFormatter(),
+  }
+  if(isNaN(tokensToSell) || tokensToSell === '' || tokensToSell > availableTokensToSell){
+    alert('Please enter how many tokens you want to sell')
+  }else{
+    postSellTransaction(sellInfo)
+  }
+}
+
+const currentDateFormatter= () => {
+  const date = new Date();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0')
+  const day = date.getDate().toString().padStart(2, '0')
+  const year = date.getFullYear()
+  const formattedDate = `${month}/${day}/${year}`
+  return formattedDate
+}
+
+const usdFormatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+});
+
+const last24HrFormatter = (crypto) => {
+  if(crypto.changePercent24Hr.slice(0,1) === '-'){
+    return `${crypto.changePercent24Hr.slice(0,5)}`
+  }else{
+    return`+${crypto.changePercent24Hr.slice(0,4)}`
+  }
+}
+
 const searchSelectedCrypto = (e) => {
   const cryptoToSearch = e.target.id.split('_')[1]
   navigateToWallet(cryptoToSearch)
@@ -370,16 +368,15 @@ const navigateToChart = (cryptoToChart) => {
 }
 
 const fetchCryptoHistory = (cryptoId, interval, cryptoName) => {
-const startOfYear = new Date(new Date().getFullYear(), 0, 1).getTime();
-const currentTime = Date.now();
-const baseUrl = `https://api.coincap.io/v2/assets/${cryptoId}/history`
-const query = `?interval=${interval}&start=${startOfYear}&end=${currentTime}`;
-const endpoint = `${baseUrl}${query}`;
-
-  fetch(endpoint)
-    .then(res => res.json())
-    .then(data => renderChart(data, cryptoName))
-    .catch(handleError)
+  const startOfYear = new Date(new Date().getFullYear(), 0, 1).getTime();
+  const currentTime = Date.now();
+  const baseUrl = `https://api.coincap.io/v2/assets/${cryptoId}/history`
+  const query = `?interval=${interval}&start=${startOfYear}&end=${currentTime}`;
+  const endpoint = `${baseUrl}${query}`;
+    fetch(endpoint)
+      .then(res => res.json())
+      .then(data => renderChart(data, cryptoName))
+      .catch(handleError)
 }
 
 const renderChart = (priceHistory, cryptoName) => constructChartData(priceHistory, cryptoName)

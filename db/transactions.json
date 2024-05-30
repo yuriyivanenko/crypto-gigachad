@@ -269,6 +269,86 @@
       "crypto": "dogecoin",
       "transactionType": "buy",
       "buyValue": 40000
+    },
+    {
+      "id": "12f3",
+      "crypto": "dogecoin",
+      "currentPrice": "0.1624343298673917",
+      "transactionType": "sell",
+      "tokensAmount": 1,
+      "todaysDate": "05/30/2024"
+    },
+    {
+      "id": "db60",
+      "buyAmount": 5000,
+      "tokensAmount": 29.315596839397685,
+      "currentPrice": 170.55767369813267,
+      "todaysDate": "05/30/2024",
+      "crypto": "solana",
+      "transactionType": "buy",
+      "buyValue": 5000
+    },
+    {
+      "id": "c8fc",
+      "crypto": "solana",
+      "currentPrice": "170.5576736981326693",
+      "transactionType": "sell",
+      "tokensAmount": 29.315596839397685,
+      "todaysDate": "05/30/2024"
+    },
+    {
+      "id": "9854",
+      "buyAmount": 40000,
+      "tokensAmount": 76195.38729165049,
+      "currentPrice": 0.5249661616246317,
+      "todaysDate": "05/30/2024",
+      "crypto": "xrp",
+      "transactionType": "buy",
+      "buyValue": 40000
+    },
+    {
+      "id": "f079",
+      "crypto": "dogecoin",
+      "currentPrice": "0.1623844181787667",
+      "transactionType": "sell",
+      "tokensAmount": 1000,
+      "todaysDate": "05/30/2024"
+    },
+    {
+      "id": "9c41",
+      "buyAmount": 1000,
+      "tokensAmount": 37730862.72618212,
+      "currentPrice": 0.0000265035021133,
+      "todaysDate": "05/30/2024",
+      "crypto": "shiba-inu",
+      "transactionType": "buy",
+      "buyValue": 1000
+    },
+    {
+      "id": "d5b4",
+      "crypto": "dogecoin",
+      "currentPrice": "0.1628616001583696",
+      "transactionType": "sell",
+      "tokensAmount": 243767.11153255365,
+      "todaysDate": "05/30/2024"
+    },
+    {
+      "id": "c109",
+      "buyAmount": 1000,
+      "tokensAmount": 1.6658769557990372,
+      "currentPrice": 600.2844306831475,
+      "todaysDate": "05/30/2024",
+      "crypto": "binance-coin",
+      "transactionType": "buy",
+      "buyValue": 1000
+    },
+    {
+      "id": "51c6",
+      "crypto": "binance-coin",
+      "currentPrice": "600.5913727979834935",
+      "transactionType": "sell",
+      "tokensAmount": 1.6658769557990372,
+      "todaysDate": "05/30/2024"
     }
   ]
 }
