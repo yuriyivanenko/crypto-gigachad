@@ -44,6 +44,96 @@
       "todaysDate": "05/29/2024",
       "crypto": "ethereum",
       "buyValue": 2500
+    },
+    {
+      "id": "4fda",
+      "buyAmount": 1000,
+      "tokensAmount": 1.6834798275082095,
+      "currentPrice": 594.00771168143,
+      "todaysDate": "05/29/2024",
+      "crypto": "binance-coin",
+      "buyValue": 1000
+    },
+    {
+      "id": "6c6b",
+      "buyAmount": 10000,
+      "tokensAmount": 0.14842968263564912,
+      "currentPrice": 67371.96915354887,
+      "todaysDate": "05/29/2024",
+      "crypto": "bitcoin",
+      "buyValue": 10000
+    },
+    {
+      "id": "59f7",
+      "buyAmount": 10000,
+      "tokensAmount": 0.1484551097194387,
+      "currentPrice": 67360.42982217809,
+      "todaysDate": "05/29/2024",
+      "crypto": "bitcoin",
+      "buyValue": 10000
+    },
+    {
+      "id": "84d3",
+      "buyAmount": 100,
+      "tokensAmount": 0.001484551097194387,
+      "currentPrice": 67360.42982217809,
+      "todaysDate": "05/29/2024",
+      "crypto": "bitcoin",
+      "buyValue": 100
+    },
+    {
+      "id": "8726",
+      "buyAmount": 100,
+      "tokensAmount": 0.0014852641337329787,
+      "currentPrice": 67328.0918382279,
+      "todaysDate": "05/29/2024",
+      "crypto": "bitcoin",
+      "buyValue": 100
+    },
+    {
+      "id": "7902",
+      "buyAmount": 1000,
+      "tokensAmount": 0.01485253049253849,
+      "currentPrice": 67328.59430939212,
+      "todaysDate": "05/29/2024",
+      "crypto": "bitcoin",
+      "buyValue": 1000
+    },
+    {
+      "id": "c3cc",
+      "buyAmount": 100,
+      "tokensAmount": 0.001485914404826387,
+      "currentPrice": 67298.6274816307,
+      "todaysDate": "05/29/2024",
+      "crypto": "bitcoin",
+      "buyValue": 100
+    },
+    {
+      "id": "dd56",
+      "buyAmount": 1000,
+      "tokensAmount": 0.014875843733408044,
+      "currentPrice": 67223.07775754652,
+      "todaysDate": "05/29/2024",
+      "crypto": "bitcoin",
+      "buyValue": 1000
+    },
+    {
+      "id": "7c68",
+      "buyAmount": 100,
+      "tokensAmount": 0.0014870373855103993,
+      "currentPrice": 67247.80491357773,
+      "todaysDate": "05/29/2024",
+      "crypto": "bitcoin",
+      "buyValue": 100
+    },
+    {
+      "id": "456c",
+      "buyAmount": 100,
+      "tokensAmount": 0.0014876947985576518,
+      "currentPrice": 67218.0880762317,
+      "todaysDate": "05/29/2024",
+      "crypto": "bitcoin",
+      "buyValue": 100
     }
   ]
 }

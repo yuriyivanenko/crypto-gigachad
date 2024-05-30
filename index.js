@@ -16,11 +16,15 @@ let globalScan
 let globalTransactions
 
 const navigatePageViews = (e) => {
+  console.log(e.target)
+  console.log(e.target.parentElement.id)
+
   const activeLink = e.target.parentElement.id.split('-')[2]
   const allViewIds = ['scanner', 'chart', 'wallet']
+  
   allViewIds.forEach(id => document.getElementById(`${id}`).style.display = 'none')
   document.getElementById(`${activeLink}`).style.display = 'block'
-  navLinks.forEach(link => link.classList.remove('active'))
+  //navLinks.forEach(link => link.classList.remove('active'))
 }
 
 const handleError = (error) => {
@@ -71,12 +75,16 @@ const handleGetTransactionsSuccess = (transactionsArray) => {
 
 const renderTable = (holdingsObject) => {
   for(const holding in holdingsObject){
-    console.log(holdingsObject[holding])
+    // console.log(holdingsObject[holding])
     const tr = document.createElement('tr')
     const value = usdFormatter.format(holdingsObject[holding].marketValue)
+    const currentPrice = usdFormatter.format(globalScan.find(item => item.id === holding).priceUsd)
+    // console.log(currentPrice)
+    const nameOfHolding = holding.charAt(0).toUpperCase() + holding.slice(1)
     tr.innerHTML = `
-      <td>${holding}</td>
+      <td>${nameOfHolding}</td>
       <td>${holdingsObject[holding].tokens}</td>
+      <td>${currentPrice}</td>
       <td>${value}</td>
       `
     document.querySelector('#holdings-table tbody').appendChild(tr)
@@ -146,6 +154,9 @@ const handleBuySuccess = () => {
   document.querySelector('#crypto-buy-input').value = ''
   document.querySelector('#search-result').textContent = '-'
   document.querySelector('#tokens-amount').textContent = 'Order submitted successfully!'
+  //Render table
+  document.querySelector('#holdings-table tbody').innerHTML = ''
+  getTransactions()
 }
 
 const getCurrentDateFormatted= () => {
