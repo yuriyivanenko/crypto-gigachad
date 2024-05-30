@@ -8,6 +8,7 @@ const addFundsBtn = document.querySelector('#add-funds-button')
 const searchCryptoBtn = document.querySelector('#search-crypto-button')
 const buyBtn = document.querySelector('#buy-crypto-button')
 const buyInputField = document.querySelector('#crypto-buy-input')
+const sellBtn = document.querySelector('#sell_button')
 
 let chartInstance
 let globalWallet = {}
@@ -56,53 +57,103 @@ const getTransactions = () => {
 const handleGetTransactionsSuccess = (transactionsArray) => {
   globalTransactions = transactionsArray//Might not need this
   const holdingsObject = {}
+  //Handle buy and sell transactions
   transactionsArray.forEach(transaction => {
+    const ourSpecificCryptosMarketPrice = globalScan.find(crypto => crypto.id === transaction.crypto).priceUsd
     if(holdingsObject.hasOwnProperty(transaction.crypto)){
-      const ourSpecificCryptosMarketPrice = globalScan.find(crypto => crypto.id === transaction.crypto).priceUsd
-      holdingsObject[transaction.crypto].tokens += transaction.tokensAmount
-      const currentTokensValue = ourSpecificCryptosMarketPrice * transaction.tokensAmount
-      // console.log(currentTokensValue)
-      holdingsObject[transaction.crypto].marketValue += currentTokensValue 
+      if(transaction.transactionType === 'buy'){
+        holdingsObject[transaction.crypto].tokens += transaction.tokensAmount
+        const currentTokensValue = ourSpecificCryptosMarketPrice * transaction.tokensAmount
+        holdingsObject[transaction.crypto].marketValue += currentTokensValue 
+      }else{
+        holdingsObject[transaction.crypto].tokens -= transaction.tokensAmount
+        const currentTokensValue = ourSpecificCryptosMarketPrice * transaction.tokensAmount
+        holdingsObject[transaction.crypto].marketValue -= currentTokensValue 
+      }
     }else{
-      holdingsObject[transaction.crypto] = {
-        tokens: transaction.tokensAmount,
-        marketValue: transaction.buyAmount
+      if(transaction.transactionType === 'buy'){
+        holdingsObject[transaction.crypto] = {
+          tokens: transaction.tokensAmount,
+          marketValue: transaction.tokensAmount * ourSpecificCryptosMarketPrice
+        }
+      }else{
+        holdingsObject[transaction.crypto] = {
+          tokens: transaction.tokensAmount,
+          marketValue: -(transaction.tokensAmount * ourSpecificCryptosMarketPrice)
+        }
       }
     }
   })
+  // console.log(holdingsObject)
   renderTable(holdingsObject)
 }
 
 const renderTable = (holdingsObject) => {
   for(const holding in holdingsObject){
-    // console.log(holdingsObject[holding])
     const tr = document.createElement('tr')
     const value = usdFormatter.format(holdingsObject[holding].marketValue)
     const currentPrice = usdFormatter.format(globalScan.find(item => item.id === holding).priceUsd)
-    // console.log(currentPrice)
     const nameOfHolding = holding.charAt(0).toUpperCase() + holding.slice(1)
-    tr.innerHTML = `
+    console.log(currentPrice)
+    if(holdingsObject[holding].marketValue >= 0.02){
+      tr.innerHTML = `
       <td>${nameOfHolding}</td>
-      <td>${holdingsObject[holding].tokens}</td>
+      <td>${holdingsObject[holding].tokens.toFixed(10)}</td>
       <td>${currentPrice}</td>
       <td>${value}</td>
-      `
-    document.querySelector('#holdings-table tbody').appendChild(tr)
+      <td><button class="btn btn-warning" id="sell_${holding}" type="button" data-bs-toggle="modal" data-bs-target="#sellModal">Sell</button></td>`
+      document.querySelector('#holdings-table tbody').appendChild(tr)
+      document.querySelector(`#sell_${holding}`).addEventListener('click', (e) => handleSellModal(e, holding, holdingsObject[holding].tokens))
+    }
+  }
+}
+
+const handleSellModal = (e, holding, availableTokensToSell) => {
+  sellBtn.style.display = 'block'
+  fetch(`https://api.coincap.io/v2/assets/${holding}`)
+    .then(res => res.json())
+    .then(cryptoData => {
+      globalSearchResult = cryptoData.data
+      const sellInput = document.querySelector('#crypto-sell-input').addEventListener('input', (e) => updateSaleValue(e, availableTokensToSell))
+      // console.log(e, holding, availableTokensToSell)
+      const currentUSDPrice = usdFormatter.format(cryptoData.data.priceUsd) 
+      document.querySelector('#token-id').innerHTML = `Token: <strong>${holding.charAt(0).toUpperCase() + holding.slice(1)}</strong>`
+      document.querySelector('#token-market-price').textContent = `Current price: ${currentUSDPrice}`
+      document.querySelector('#available-tokens').textContent = `Available tokens to sell: ${availableTokensToSell}`
+    })
+    .catch(handleError) 
+}
+
+const updateSaleValue = (e, availableTokensToSell) => {
+  const sellAmount = e.target.value
+  const marketPrice = globalSearchResult.priceUsd
+  console.log('sellAmount: ',sellAmount, 'Market price: ' , marketPrice)
+  const saleValue = sellAmount * marketPrice
+  if(sellAmount > availableTokensToSell){
+    document.querySelector('#sale-value').textContent = `You can't sell what you don't have`
+  }else if(isNaN(saleValue)){
+    document.querySelector('#sale-value').textContent = `Enter a valid number`
+  }else{
+    document.querySelector('#sale-value').textContent = usdFormatter.format(saleValue)
   }
 }
 
 const handleUpdateWallet = (updateType) => {
   let fundsAmount = parseInt(document.querySelector('#funds-input').value)
   let buyAmount = parseFloat(document.querySelector('#crypto-buy-input').value)
+  let sellAmount = document.querySelector('#sale-value').textContent
+  sellAmount = parseFloat(sellAmount.replace('$', '').replace(/,/g, ''))
   let updateWalletToThisAmount
   if(updateType === 'add'){
     updateWalletToThisAmount = fundsAmount + globalWallet.amount
     isNaN(fundsAmount) ? alert('Please enter a valid amount') : patchFundsToWallet(updateWalletToThisAmount)
+  }else if(updateType === 'sell'){
+    updateWalletToThisAmount = sellAmount + globalWallet.amount
+    patchFundsToWallet(updateWalletToThisAmount)
   }else{
     updateWalletToThisAmount = globalWallet.amount - buyAmount
     isNaN(buyAmount) ? alert('Amount to buy is invalid') : patchFundsToWallet(updateWalletToThisAmount)
   } 
-  
 }
 
 const handleSearchCrypto = () => {
@@ -132,7 +183,8 @@ const handleBuyCrypto = () => {
     tokensAmount: parseFloat(document.querySelector('#tokens-amount').textContent.split(' ')[3]),
     currentPrice: parseFloat(globalSearchResult.priceUsd),
     todaysDate: getCurrentDateFormatted(),
-    crypto: globalSearchResult.id
+    crypto: globalSearchResult.id,
+    transactionType: 'buy'
   }
   buyInfo.buyValue = parseFloat(document.querySelector('#crypto-buy-input').value)
   if(buyInfo.buyAmount <= globalWallet.amount){
@@ -148,6 +200,45 @@ const handleBuyCrypto = () => {
   else{
     alert(`You're poor! Get some more funds!`)
   }
+}
+
+const handleSellCrypto = () => {
+  document.querySelector('#sell_button').style.display = 'block'
+  const availableTokensToSell = document.querySelector('#available-tokens').textContent.split(' ')[4]
+  const tokensToSell = document.querySelector('#crypto-sell-input').value
+  const sellInfo = {
+    crypto: globalSearchResult.id,
+    currentPrice: globalSearchResult.priceUsd,
+    transactionType: 'sell',
+    tokensAmount: parseFloat(tokensToSell),
+    todaysDate: getCurrentDateFormatted(),
+  }
+  if(isNaN(tokensToSell) || tokensToSell === '' || tokensToSell > availableTokensToSell){
+    alert('Please enter how many tokens you want to sell')
+  }else{
+    postSellTransaction(sellInfo)
+  }
+}
+
+const postSellTransaction = (sellInfo) => {
+  fetch('http://localhost:3001/transactions',{
+  method: "POST",
+  headers: {'Content-Type': 'application/json'},
+  body: JSON.stringify(sellInfo)
+  })
+    .then(res => res.json())
+    .then(handleSellSuccess)
+    .catch(handleError)
+}
+
+const handleSellSuccess = () => {
+  handleUpdateWallet('sell')
+  document.querySelector('#crypto-sell-input').value = ''
+  document.querySelector('#available-tokens').value = ''
+  document.querySelector('#holdings-table tbody').innerHTML = ''
+  document.querySelector('#sale-value').textContent = 'Order submitted successfully!'
+  document.querySelector('#sell_button').style.display = 'none'
+  getTransactions()
 }
 
 const postBuyTransaction = (buyInfo) => {
@@ -261,7 +352,7 @@ const renderCryptoCard = (crypto) => {
       </button>
     </div>
     <div class="px-3">
-      <button type="button" id="buy_${crypto.id}" class="btn btn-primary text-nowrap"><i class="bi bi-currency-bitcoin"></i> Buy </button>
+      <button type="button" id="buy_${crypto.id}" class="btn btn-primary text-nowrap"> Buy </button>
     </div>
   </div>`
   allCryptoList.appendChild(cardDiv)
@@ -271,7 +362,6 @@ const renderCryptoCard = (crypto) => {
 
 const searchSelectedCrypto = (e) => {
   const cryptoToSearch = e.target.id.split('_')[1]
-  console.log(cryptoToSearch)
   navigateToWallet(cryptoToSearch)
 }
 
@@ -345,15 +435,16 @@ const constructChartData = (priceHistory, cryptoName) => {
 }
 
 const initApp = () => {
-  handleFetchSuccess(cryptoData)
+  // handleFetchSuccess(cryptoData)
   getWalletInfo()
   // getTransactions()
-  // getCryptoDataFromAPI()
+  getCryptoDataFromAPI()
   navLinks.forEach(link => link.addEventListener('click', navigatePageViews))
   addFundsBtn.addEventListener('click', () => handleUpdateWallet('add'))
   searchCryptoBtn.addEventListener('click', handleSearchCrypto)
   buyBtn.addEventListener('click', handleBuyCrypto)
   buyInputField.addEventListener('input', handleBuyInputChange)
+  sellBtn.addEventListener('click', handleSellCrypto)
 }
 
 initApp()
