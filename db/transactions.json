@@ -377,6 +377,26 @@
       "crypto": "bitcoin",
       "transactionType": "buy",
       "buyValue": 50000
+    },
+    {
+      "id": "e785",
+      "buyAmount": 5000,
+      "tokensAmount": 189548688.62270364,
+      "currentPrice": 0.0000263784468061,
+      "todaysDate": "05/30/2024",
+      "crypto": "shiba-inu",
+      "transactionType": "buy",
+      "buyValue": 5000
+    },
+    {
+      "id": "9d2e",
+      "buyAmount": 1000,
+      "tokensAmount": 5.8781608368784815,
+      "currentPrice": 170.12123821556347,
+      "todaysDate": "05/30/2024",
+      "crypto": "solana",
+      "transactionType": "buy",
+      "buyValue": 1000
     }
   ]
 }
