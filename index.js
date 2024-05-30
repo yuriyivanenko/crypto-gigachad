@@ -7,6 +7,7 @@ const buyBtn = document.querySelector('#buy-crypto-button')
 const buyInputField = document.querySelector('#crypto-buy-input')
 const sellBtn = document.querySelector('#sell_button')
 const refreshBtn = document.querySelector('#refresh-holdings-button')
+const navBarLogo = document.querySelector('#navbar-logo')
 
 let chartInstance
 let globalWallet = {}
@@ -413,6 +414,11 @@ const constructChartData = (priceHistory, cryptoName) => {
 
 const refreshCurrentHoldingsTable = () => getCryptoDataFromAPI()
 
+const addSpinAnimation = (e) => {
+  e.target.addEventListener('mouseover', (e)=> e.target.classList.add('spin'))
+  e.target.addEventListener('mouseout', (e)=> e.target.classList.remove('spin'))
+}
+
 const initApp = () => {
   getWalletInfo()
   getCryptoDataFromAPI()
@@ -423,6 +429,7 @@ const initApp = () => {
   buyInputField.addEventListener('input', handleBuyInputChange)
   sellBtn.addEventListener('click', handleSellCrypto)
   refreshBtn.addEventListener('click', refreshCurrentHoldingsTable)
+  navBarLogo.addEventListener('mouseover', addSpinAnimation)
 }
 
 initApp()
