@@ -188,6 +188,15 @@
       "todaysDate": "05/30/2024",
       "crypto": "bitcoin",
       "buyValue": 10000
+    },
+    {
+      "id": "cbff",
+      "buyAmount": 11200,
+      "tokensAmount": 0.16431257110070033,
+      "currentPrice": 68162.77004840967,
+      "todaysDate": "05/30/2024",
+      "crypto": "bitcoin",
+      "buyValue": 11200
     }
   ]
 }

@@ -123,6 +123,10 @@ const handleBuyInputChange = (e) => {
 }
 
 const handleBuyCrypto = () => {
+  if(!globalSearchResult){
+    alert('You need to first search a crypto currency')
+    return
+  }
   const buyInfo = {
     buyAmount: parseInt(document.querySelector('#crypto-buy-input').value),
     tokensAmount: parseFloat(document.querySelector('#tokens-amount').textContent.split(' ')[3]),
@@ -158,7 +162,6 @@ const postBuyTransaction = (buyInfo) => {
 }
 
 const handleBuySuccess = () => {
-  //Update wallet to reflect the recent purchase
   handleUpdateWallet('reduce')
   document.querySelector('#crypto-search-input').value = ''
   document.querySelector('#crypto-buy-input').value = ''
@@ -258,16 +261,28 @@ const renderCryptoCard = (crypto) => {
       </button>
     </div>
     <div class="px-3">
-      <button type="button" class="btn btn-primary text-nowrap"><i class="bi bi-currency-bitcoin"></i> Buy / Sell</button>
+      <button type="button" id="buy_${crypto.id}" class="btn btn-primary text-nowrap"><i class="bi bi-currency-bitcoin"></i> Buy </button>
     </div>
   </div>`
   allCryptoList.appendChild(cardDiv)
   document.getElementById(`chart-${crypto.id}`).addEventListener('click', chartSelectedCrypto)
+  document.getElementById(`buy_${crypto.id}`).addEventListener('click', searchSelectedCrypto)
+}
+
+const searchSelectedCrypto = (e) => {
+  const cryptoToSearch = e.target.id.split('_')[1]
+  console.log(cryptoToSearch)
+  navigateToWallet(cryptoToSearch)
 }
 
 const chartSelectedCrypto = (e) => {
   const cryptoData = {...e.target.dataset}
   navigateToChart(cryptoData)
+}
+
+const navigateToWallet = (cryptoToSearch) => {
+  document.querySelector('#nav-link-wallet').childNodes[0].click()
+  document.querySelector('#crypto-search-input').value = cryptoToSearch
 }
 
 const navigateToChart = (cryptoToChart) => {
