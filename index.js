@@ -186,13 +186,14 @@ const renderCryptoCard = (crypto) => {
   cardDiv.classList.add('crypto-card', 'mb-3')
   cardDiv.innerHTML = `
   <div class="icon">
-        <img width="50px" alt="${crypto.id}" src="./src/images/64/${crypto.id}.png" />
+      <img width="50px" alt="${crypto.id}" src="./src/images/64/${crypto.id}.png" />
+  </div>
+  <div class="details">
+    <div class="title">${crypto.name}</div>
+    <div class="info">
+      <div class="icon-text"><i class="bi bi-clock px-2"></i> 24h Change: ${last24HrFormatter(crypto)}%
     </div>
-    <div class="details">
-      <div class="title">${crypto.name}</div>
-      <div class="info">
-        <div class="icon-text"><i class="bi bi-clock px-2"></i> 24h Change: ${last24HrFormatter(crypto)}%</div>
-    </div>
+  </div>
     </div>
     <div class="d-flex w-100 justify-content-between align-items-center px-3 py-2">
     <div class="price-container px-3">
