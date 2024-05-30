@@ -349,6 +349,24 @@
       "transactionType": "sell",
       "tokensAmount": 1.6658769557990372,
       "todaysDate": "05/30/2024"
+    },
+    {
+      "id": "7749",
+      "buyAmount": 10000,
+      "tokensAmount": 16.653018093666482,
+      "currentPrice": 600.4917513302424,
+      "todaysDate": "05/30/2024",
+      "crypto": "binance-coin",
+      "transactionType": "buy",
+      "buyValue": 10000
+    },
+    {
+      "id": "ab5d",
+      "crypto": "binance-coin",
+      "currentPrice": "600.5341005386967950",
+      "transactionType": "sell",
+      "tokensAmount": 16.653018093666482,
+      "todaysDate": "05/30/2024"
     }
   ]
 }
